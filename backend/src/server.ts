@@ -4,6 +4,13 @@ import dotenv from "dotenv";
 import axios from "axios";
 import fs from "node:fs";
 import path from "node:path";
+import { calculateComfortIndex } from "./utils/comfortIndex";
+import {
+  weatherCache,
+  recordCacheHit,
+  recordCacheMiss,
+  getCacheStats,
+} from "./services/cacheService";
 
 dotenv.config();
 
@@ -69,6 +76,16 @@ const cityCodes = citiesData.List.map(
 async function getWeatherByCityId(
   cityId: string
 ): Promise<OpenWeatherResponse> {
+  const cachedWeather =
+    weatherCache.get<OpenWeatherResponse>(cityId);
+
+  if (cachedWeather) {
+    recordCacheHit();
+    return cachedWeather;
+  }
+
+  recordCacheMiss();
+
   const apiKey = process.env.OPENWEATHER_API_KEY;
 
   if (!apiKey) {
@@ -85,6 +102,8 @@ async function getWeatherByCityId(
       },
     }
   );
+
+  weatherCache.set(cityId, response.data);
 
   return response.data;
 }
@@ -148,23 +167,43 @@ app.get("/api/weather", async (req, res) => {
     );
 
     const weatherData = weatherResponses.map(
-      (weather) => ({
-        cityId: weather.id,
-        cityName: weather.name,
-        description:
-          weather.weather[0]?.description ?? "Unknown",
-        temperature: weather.main.temp,
-        humidity: weather.main.humidity,
-        windSpeed: weather.wind.speed,
-        pressure: weather.main.pressure,
-        visibility: weather.visibility,
-        cloudiness: weather.clouds.all,
+      (weather) => {
+        const comfortScore = calculateComfortIndex(
+          weather.main.temp,
+          weather.main.humidity,
+          weather.wind.speed
+        );
+
+        return {
+          cityId: weather.id,
+          cityName: weather.name,
+          description:
+            weather.weather[0]?.description ?? "Unknown",
+          temperature: weather.main.temp,
+          humidity: weather.main.humidity,
+          windSpeed: weather.wind.speed,
+          pressure: weather.main.pressure,
+          visibility: weather.visibility,
+          cloudiness: weather.clouds.all,
+          comfortScore,
+        };
+      }
+    );
+
+    weatherData.sort(
+      (a, b) => b.comfortScore - a.comfortScore
+    );
+
+    const rankedWeatherData = weatherData.map(
+      (weather, index) => ({
+        ...weather,
+        rank: index + 1,
       })
     );
 
     res.json({
-      count: weatherData.length,
-      data: weatherData,
+      count: rankedWeatherData.length,
+      data: rankedWeatherData,
     });
   } catch (error) {
     console.error(error);
@@ -173,6 +212,10 @@ app.get("/api/weather", async (req, res) => {
       message: "Failed to fetch weather data",
     });
   }
+});
+
+app.get("/api/cache/status", (req, res) => {
+  res.json(getCacheStats());
 });
 
 app.listen(PORT, () => {
