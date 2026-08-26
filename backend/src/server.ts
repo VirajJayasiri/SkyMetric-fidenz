@@ -20,6 +20,32 @@ interface CitiesFile {
   List: City[];
 }
 
+interface OpenWeatherResponse {
+  id: number;
+  name: string;
+
+  weather: {
+    main: string;
+    description: string;
+  }[];
+
+  main: {
+    temp: number;
+    humidity: number;
+    pressure: number;
+  };
+
+  wind: {
+    speed: number;
+  };
+
+  clouds: {
+    all: number;
+  };
+
+  visibility: number;
+}
+
 const citiesFilePath = path.join(
   process.cwd(),
   "src",
@@ -39,6 +65,29 @@ const citiesData: CitiesFile = JSON.parse(
 const cityCodes = citiesData.List.map(
   (city) => city.CityCode
 );
+
+async function getWeatherByCityId(
+  cityId: string
+): Promise<OpenWeatherResponse> {
+  const apiKey = process.env.OPENWEATHER_API_KEY;
+
+  if (!apiKey) {
+    throw new Error("OpenWeather API key is missing");
+  }
+
+  const response = await axios.get<OpenWeatherResponse>(
+    "https://api.openweathermap.org/data/2.5/weather",
+    {
+      params: {
+        id: cityId,
+        appid: apiKey,
+        units: "metric",
+      },
+    }
+  );
+
+  return response.data;
+}
 
 app.use(cors());
 app.use(express.json());
@@ -88,6 +137,42 @@ app.get("/api/cities/codes", (req, res) => {
     count: cityCodes.length,
     cityCodes,
   });
+});
+
+app.get("/api/weather", async (req, res) => {
+  try {
+    const weatherResponses = await Promise.all(
+      cityCodes.map((cityCode) =>
+        getWeatherByCityId(cityCode)
+      )
+    );
+
+    const weatherData = weatherResponses.map(
+      (weather) => ({
+        cityId: weather.id,
+        cityName: weather.name,
+        description:
+          weather.weather[0]?.description ?? "Unknown",
+        temperature: weather.main.temp,
+        humidity: weather.main.humidity,
+        windSpeed: weather.wind.speed,
+        pressure: weather.main.pressure,
+        visibility: weather.visibility,
+        cloudiness: weather.clouds.all,
+      })
+    );
+
+    res.json({
+      count: weatherData.length,
+      data: weatherData,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to fetch weather data",
+    });
+  }
 });
 
 app.listen(PORT, () => {
