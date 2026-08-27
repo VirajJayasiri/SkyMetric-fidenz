@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { fetchWeatherData } from "./services/weatherApi";
 import type { WeatherCity } from "./types/weather";
+import WeatherCard from "./components/WeatherCard";
 
 function App() {
   const [weatherData, setWeatherData] = useState<WeatherCity[]>([]);
@@ -32,24 +33,42 @@ function App() {
   }
 
   return (
-    <div>
-      <h1>SkyMetric</h1>
-      <p>Weather Comfort Rankings</p>
-
-      {weatherData.map((city) => (
-        <div key={city.cityId}>
-          <h2>
-            #{city.rank} {city.cityName}
-          </h2>
-
-          <p>Weather: {city.description}</p>
-          <p>Temperature: {city.temperature}°C</p>
-          <p>Comfort Score: {city.comfortScore}/100</p>
-
-          <hr />
+    <main className="app">
+      <header className="dashboard-header">
+        <div>
+          <p className="eyebrow">LIVE WEATHER ANALYTICS</p>
+          <h1>SkyMetric</h1>
+          <p className="subtitle">
+            City comfort rankings based on live weather conditions.
+          </p>
         </div>
-      ))}
-    </div>
+
+        <div className="city-count">
+          <span>Analyzed Cities</span>
+          <strong>{weatherData.length}</strong>
+        </div>
+      </header>
+
+      <section className="ranking-section">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">COMFORT INDEX</p>
+            <h2>City Rankings</h2>
+          </div>
+
+          <p>Most comfortable to least comfortable</p>
+        </div>
+
+        <div className="weather-grid">
+          {weatherData.map((city) => (
+            <WeatherCard
+              key={city.cityId}
+              city={city}
+            />
+          ))}
+        </div>
+      </section>
+    </main>
   );
 }
 
