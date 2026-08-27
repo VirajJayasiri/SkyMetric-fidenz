@@ -118,39 +118,6 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-app.get("/api/weather/test", async (req, res) => {
-  try {
-    const apiKey = process.env.OPENWEATHER_API_KEY;
-
-    if (!apiKey) {
-      return res.status(500).json({
-        message: "OpenWeather API key is missing",
-      });
-    }
-
-    const cityId = 2172797;
-
-    const response = await axios.get(
-      "https://api.openweathermap.org/data/2.5/weather",
-      {
-        params: {
-          id: cityId,
-          appid: apiKey,
-          units: "metric",
-        },
-      }
-    );
-
-    res.json(response.data);
-  } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message: "Failed to fetch weather data",
-    });
-  }
-});
-
 app.get("/api/cities/codes", (req, res) => {
   res.json({
     count: cityCodes.length,
