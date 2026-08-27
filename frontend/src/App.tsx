@@ -26,11 +26,33 @@ function App() {
   }, []);
 
   if (loading) {
-    return <p>Loading weather data...</p>;
+    return (
+      <main className="status-page">
+        <div className="status-card">
+          <div className="loader"></div>
+          <h1>SkyMetric</h1>
+          <p>Loading live weather data...</p>
+        </div>
+      </main>
+    );
   }
 
   if (error) {
-    return <p>{error}</p>;
+    return (
+      <main className="status-page">
+        <div className="status-card">
+          <h1>Something went wrong</h1>
+          <p>{error}</p>
+
+          <button
+            className="retry-button"
+            onClick={() => window.location.reload()}
+          >
+            Try Again
+          </button>
+        </div>
+      </main>
+    );
   }
 
   return (
