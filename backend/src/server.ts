@@ -5,6 +5,7 @@ import axios from "axios";
 import fs from "node:fs";
 import path from "node:path";
 import { calculateComfortIndex } from "./utils/comfortIndex";
+import { checkJwt } from "./middleware/auth";
 import {
   weatherCache,
   recordCacheHit,
@@ -125,7 +126,7 @@ app.get("/api/cities/codes", (req, res) => {
   });
 });
 
-app.get("/api/weather", async (req, res) => {
+app.get("/api/weather", checkJwt, async (req, res) => {
   try {
     const weatherResponses = await Promise.all(
       cityCodes.map((cityCode) =>
@@ -181,7 +182,7 @@ app.get("/api/weather", async (req, res) => {
   }
 });
 
-app.get("/api/cache/status", (req, res) => {
+app.get("/api/cache/status", checkJwt, (req, res) => {
   res.json(getCacheStats());
 });
 
