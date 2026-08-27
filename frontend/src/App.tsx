@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { fetchWeatherData } from "./services/weatherApi";
 import type { WeatherCity } from "./types/weather";
 import WeatherCard from "./components/WeatherCard";
+import "./App.css";
 
 function App() {
   const [weatherData, setWeatherData] = useState<WeatherCity[]>([]);
