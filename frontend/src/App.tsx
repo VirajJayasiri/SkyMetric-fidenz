@@ -61,6 +61,12 @@ function App() {
     return (
       <main className="login-page">
         <section className="login-card">
+          <img
+            src="/skymetric-icon.png"
+            alt="SkyMetric logo"
+            className="login-logo"
+          />
+
           <p className="eyebrow">WEATHER ANALYTICS</p>
 
           <h1>SkyMetric</h1>
@@ -117,7 +123,15 @@ function App() {
         <div>
           <p className="eyebrow">LIVE WEATHER ANALYTICS</p>
 
-          <h1>SkyMetric</h1>
+          <div className="brand-title">
+            <img
+              src="/skymetric-icon.png"
+              alt="SkyMetric logo"
+              className="brand-icon"
+            />
+
+            <h1>SkyMetric</h1>
+          </div>
 
           <p className="subtitle">
             City comfort rankings based on live weather conditions.

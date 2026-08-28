@@ -28,6 +28,22 @@
   letter-spacing: -0.04em;
 }
 
+.brand-title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.brand-title h1 {
+  margin: 0;
+}
+
+.brand-icon {
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+}
+
 .subtitle {
   margin: 0;
   color: #cbd5e1;
@@ -314,6 +330,13 @@
   box-shadow: 0 18px 50px rgba(15, 23, 42, 0.1);
 }
 
+.login-logo {
+  width: 90px;
+  height: 90px;
+  object-fit: contain;
+  margin-bottom: 14px;
+}
+
 .login-card h1 {
   margin: 8px 0 16px;
   font-size: 3rem;
@@ -385,5 +408,12 @@
 
   .user-info {
     text-align: left;
+  }
+}
+
+@media (max-width: 480px) {
+  .brand-icon {
+    width: 46px;
+    height: 46px;
   }
 }
