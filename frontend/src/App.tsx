@@ -21,29 +21,51 @@ function App() {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      setLoading(false);
       return;
     }
 
+    let cancelled = false;
+
     async function loadWeather() {
       try {
-        setLoading(true);
-        setError("");
-
         const accessToken = await getAccessTokenSilently();
-
         const response = await fetchWeatherData(accessToken);
-        setWeatherData(response.data);
+
+        if (!cancelled) {
+          setWeatherData(response.data);
+          setError("");
+        }
       } catch (err) {
         console.error(err);
-        setError("Failed to load weather data.");
+
+        if (!cancelled) {
+          setError("Failed to load weather data.");
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     }
 
-    loadWeather();
+    void loadWeather();
+
+    return () => {
+      cancelled = true;
+    };
   }, [isAuthenticated, getAccessTokenSilently]);
+
+  const handleLogout = () => {
+    setWeatherData([]);
+    setLoading(true);
+    setError("");
+
+    logout({
+      logoutParams: {
+        returnTo: window.location.origin,
+      },
+    });
+  };
 
   if (authLoading) {
     return (
@@ -146,13 +168,7 @@ function App() {
 
           <button
             className="logout-button"
-            onClick={() =>
-              logout({
-                logoutParams: {
-                  returnTo: window.location.origin,
-                },
-              })
-            }
+            onClick={handleLogout}
           >
             Log Out
           </button>
