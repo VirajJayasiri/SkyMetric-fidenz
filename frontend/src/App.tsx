@@ -1,4 +1,4 @@
-import { useEffect, useState, type ChangeEvent } from "react";
+import { useEffect, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -25,6 +25,7 @@ import AnimatedBackground from "./components/AnimatedBackground";
 import ThemeToggle from "./components/ThemeToggle";
 import WeatherInsights from "./components/WeatherInsights";
 import LoadingWeather from "./components/LoadingWeather";
+import ResponsiveSelect from "./components/ResponsiveSelect";
 import "./App.css";
 
 function App() {
@@ -57,6 +58,7 @@ function App() {
   const [forecastCityName, setForecastCityName] = useState("");
   const [forecastLoading, setForecastLoading] = useState(false);
   const [forecastError, setForecastError] = useState("");
+  const [loggingOut, setLoggingOut] = useState(false);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -82,6 +84,38 @@ function App() {
         if (!cancelled) {
           setWeatherData(response.data);
           setError("");
+
+          const bestCity = response.data.reduce<WeatherCity | undefined>(
+            (best, city) =>
+              !best || city.comfortScore > best.comfortScore ? city : best,
+            undefined
+          );
+
+          if (bestCity) {
+            setSelectedForecastCity(String(bestCity.cityId));
+            setForecastLoading(true);
+
+            void fetchForecastData(bestCity.cityId, accessToken)
+              .then((forecastResponse) => {
+                if (!cancelled) {
+                  setForecastData(forecastResponse.data);
+                  setForecastCityName(forecastResponse.cityName);
+                  setForecastError("");
+                }
+              })
+              .catch((forecastErr) => {
+                console.error(forecastErr);
+
+                if (!cancelled) {
+                  setForecastError("Failed to load temperature trend.");
+                }
+              })
+              .finally(() => {
+                if (!cancelled) {
+                  setForecastLoading(false);
+                }
+              });
+          }
         }
       } catch (err) {
         console.error(err);
@@ -104,22 +138,21 @@ function App() {
   }, [isAuthenticated, getAccessTokenSilently]);
 
   const handleLogout = () => {
+    setLoggingOut(true);
     setWeatherData([]);
     setLoading(true);
     setError("");
 
-    logout({
-      logoutParams: {
-        returnTo: window.location.origin,
-      },
-    });
+    window.setTimeout(() => {
+      logout({
+        logoutParams: {
+          returnTo: window.location.origin,
+        },
+      });
+    }, 0);
   };
 
-  const handleForecastCityChange = async (
-    event: ChangeEvent<HTMLSelectElement>
-  ) => {
-    const value = event.target.value;
-
+  const handleForecastCityChange = async (value: string) => {
     setSelectedForecastCity(value);
     setForecastError("");
     setForecastData([]);
@@ -184,12 +217,26 @@ function App() {
       }
     });
 
+  if (loggingOut) {
+    return (
+      <main className="app-viewport">
+        <AnimatedBackground theme={theme} variant="login" />
+        <LoadingWeather
+          variant="logout"
+          message="Signing you out..."
+          submessage="Closing your secure session and returning to sign in"
+        />
+      </main>
+    );
+  }
+
   // Loading state during Auth0 initial check
   if (authLoading) {
     return (
       <main className="app-viewport">
         <AnimatedBackground theme={theme} variant="login" />
         <LoadingWeather
+          variant="auth"
           message="Checking authentication..."
           submessage="Establishing secure session and validating credentials"
         />
@@ -417,52 +464,46 @@ function App() {
 
             <div className="control-group">
               <label htmlFor="temperature-filter">Temperature</label>
-              <div className="input-icon-wrapper select-wrapper">
-                <Thermometer size={16} className="control-icon" />
-                <select
-                  id="temperature-filter"
-                  value={temperatureFilter}
-                  onChange={(event) =>
-                    setTemperatureFilter(
-                      event.target.value as "all" | "cool" | "mild" | "warm"
-                    )
-                  }
-                >
-                  <option value="all">All temperatures</option>
-                  <option value="cool">Cool — below 18°C</option>
-                  <option value="mild">Mild — 18°C to 27°C</option>
-                  <option value="warm">Warm — above 27°C</option>
-                </select>
-              </div>
+              <ResponsiveSelect
+                id="temperature-filter"
+                value={temperatureFilter}
+                ariaLabel="Temperature filter"
+                icon={<Thermometer size={16} />}
+                options={[
+                  { value: "all", label: "All temperatures" },
+                  { value: "cool", label: "Cool — below 18°C" },
+                  { value: "mild", label: "Mild — 18°C to 27°C" },
+                  { value: "warm", label: "Warm — above 27°C" },
+                ]}
+                onChange={(value) =>
+                  setTemperatureFilter(value as "all" | "cool" | "mild" | "warm")
+                }
+              />
             </div>
 
             <div className="control-group">
               <label htmlFor="sort-by">Sort by</label>
-              <div className="input-icon-wrapper select-wrapper">
-                <ArrowUpDown size={16} className="control-icon" />
-                <select
-                  id="sort-by"
-                  value={sortBy}
-                  onChange={(event) =>
-                    setSortBy(
-                      event.target.value as
-                        | "comfort"
-                        | "temperature-high"
-                        | "temperature-low"
-                        | "city"
-                    )
-                  }
-                >
-                  <option value="comfort">Comfort score</option>
-                  <option value="temperature-high">
-                    Temperature — High to Low
-                  </option>
-                  <option value="temperature-low">
-                    Temperature — Low to High
-                  </option>
-                  <option value="city">City — A to Z</option>
-                </select>
-              </div>
+              <ResponsiveSelect
+                id="sort-by"
+                value={sortBy}
+                ariaLabel="Sort cities"
+                icon={<ArrowUpDown size={16} />}
+                options={[
+                  { value: "comfort", label: "Comfort score" },
+                  { value: "temperature-high", label: "Temperature — High to Low" },
+                  { value: "temperature-low", label: "Temperature — Low to High" },
+                  { value: "city", label: "City — A to Z" },
+                ]}
+                onChange={(value) =>
+                  setSortBy(
+                    value as
+                      | "comfort"
+                      | "temperature-high"
+                      | "temperature-low"
+                      | "city"
+                  )
+                }
+              />
             </div>
           </div>
 
@@ -538,21 +579,18 @@ function App() {
 
             <div className="forecast-city-control">
               <label htmlFor="forecast-city">Select city</label>
-              <div className="input-icon-wrapper select-wrapper">
-                <Thermometer size={16} className="control-icon" />
-                <select
-                  id="forecast-city"
-                  value={selectedForecastCity}
-                  onChange={handleForecastCityChange}
-                >
-                  <option value="">Choose a city...</option>
-                  {weatherData.map((city) => (
-                    <option key={city.cityId} value={city.cityId}>
-                      {city.cityName}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <ResponsiveSelect
+                id="forecast-city"
+                value={selectedForecastCity}
+                ariaLabel="Forecast city"
+                placeholder="Choose a city..."
+                icon={<Thermometer size={16} />}
+                options={weatherData.map((city) => ({
+                  value: String(city.cityId),
+                  label: city.cityName,
+                }))}
+                onChange={handleForecastCityChange}
+              />
             </div>
           </div>
 

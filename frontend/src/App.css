@@ -894,6 +894,7 @@ html[data-theme="dark"] .atmospheric-grid {
   grid-template-columns: minmax(0, 2fr) minmax(0, 1.1fr) minmax(0, 1.1fr);
   gap: 16px;
   margin-bottom: 16px;
+  min-width: 0;
 }
 
 .control-group {
@@ -919,6 +920,12 @@ html[data-theme="dark"] .atmospheric-grid {
   min-width: 0;
 }
 
+.select-wrapper {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
 .control-icon {
   position: absolute;
   left: 14px;
@@ -929,6 +936,8 @@ html[data-theme="dark"] .atmospheric-grid {
 
 .input-icon-wrapper input,
 .input-icon-wrapper select {
+  display: block;
+  box-sizing: border-box;
   width: 100%;
   max-width: 100%;
   min-width: 0;
@@ -942,6 +951,10 @@ html[data-theme="dark"] .atmospheric-grid {
   font-weight: 500;
   outline: none;
   transition: all 0.2s ease;
+}
+
+.input-icon-wrapper input[type="search"] {
+  padding-right: 42px;
 }
 
 .input-icon-wrapper input::placeholder {
@@ -978,6 +991,138 @@ html[data-theme="dark"] .atmospheric-grid {
 
 .select-wrapper select {
   cursor: pointer;
+  padding-right: 38px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.responsive-select {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.responsive-select-trigger {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  padding: 10px 38px 10px 42px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-input);
+  color: var(--text-primary);
+  font-size: 0.92rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.responsive-select-trigger:hover,
+.responsive-select-trigger[aria-expanded="true"] {
+  border-color: var(--border-focus);
+  background: var(--surface);
+}
+
+.responsive-select-trigger:focus-visible {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3.5px var(--accent-soft);
+  background: var(--surface);
+}
+
+.responsive-select-leading-icon,
+.responsive-select-chevron {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.responsive-select-leading-icon {
+  left: 14px;
+}
+
+.responsive-select-chevron {
+  right: 14px;
+  transition: transform 0.2s ease;
+}
+
+.responsive-select-chevron.is-open {
+  transform: rotate(180deg);
+}
+
+.responsive-select-value {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.responsive-select-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 50;
+  width: 100%;
+  max-width: 100%;
+  max-height: 260px;
+  padding: 6px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  box-sizing: border-box;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--card-shadow-hover);
+}
+
+.responsive-select-option {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 0.92rem;
+  font-weight: 500;
+  line-height: 1.35;
+  text-align: left;
+  cursor: pointer;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.responsive-select-option.is-active,
+.responsive-select-option:hover {
+  background: var(--surface-soft);
+}
+
+.responsive-select-option.is-selected {
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.responsive-select-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
 }
 
 .results-summary {
@@ -1296,11 +1441,15 @@ html[data-theme="dark"] .comfort-bar-track {
    ========================================================================== */
 
 .forecast-section {
+  position: relative;
   margin-top: 36px;
   min-width: 0;
+  overflow: visible;
 }
 
 .forecast-controls {
+  position: relative;
+  z-index: 20;
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
@@ -1313,6 +1462,7 @@ html[data-theme="dark"] .comfort-bar-track {
   border-radius: 24px;
   box-shadow: var(--card-shadow);
   min-width: 0;
+  overflow: visible;
 }
 
 .forecast-title-group {
@@ -1343,6 +1493,8 @@ html[data-theme="dark"] .comfort-bar-track {
 }
 
 .forecast-city-control {
+  position: relative;
+  z-index: 21;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -1352,10 +1504,21 @@ html[data-theme="dark"] .comfort-bar-track {
   min-width: 0;
 }
 
+.forecast-city-control .select-wrapper,
+.forecast-city-control select {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
 .forecast-city-control label {
   color: var(--text-secondary);
   font-size: 0.8rem;
   font-weight: 700;
+}
+
+.forecast-city-control .responsive-select-menu {
+  z-index: 100;
 }
 
 .forecast-message {
@@ -1393,6 +1556,8 @@ html[data-theme="dark"] .comfort-bar-track {
 
 /* Trend Chart Card */
 .trend-chart-card {
+  position: relative;
+  z-index: 1;
   margin-top: 20px;
   padding: 28px 32px;
   background: var(--surface);
@@ -1516,8 +1681,9 @@ html[data-theme="dark"] .comfort-bar-track {
 }
 
 .loading-weather-card {
-  width: min(480px, 100%);
-  padding: 44px 36px;
+  width: min(620px, calc(100% - 40px));
+  min-width: 0;
+  padding: 34px 36px 28px;
   text-align: center;
   background: var(--surface);
   backdrop-filter: var(--glass-backdrop);
@@ -1598,10 +1764,156 @@ html[data-theme="dark"] .comfort-bar-track {
 }
 
 .loading-submessage {
-  margin: 0 0 24px;
+  margin: 0 0 20px;
   font-size: 0.84rem;
   color: var(--text-secondary);
   line-height: 1.5;
+}
+
+.auth-loading-preview {
+  display: grid;
+  gap: 14px;
+  width: 100%;
+  min-width: 0;
+  margin-bottom: 18px;
+  text-align: left;
+}
+
+.auth-progress-block {
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface-soft);
+}
+
+.auth-progress-block > span {
+  display: block;
+  margin-bottom: 9px;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.auth-progress-track {
+  position: relative;
+  width: 100%;
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--border);
+}
+
+.auth-progress-indicator {
+  position: absolute;
+  inset-block: 0;
+  left: -42%;
+  width: 42%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent, var(--accent), var(--cyan), transparent);
+  animation: authProgress 1.8s ease-in-out infinite;
+}
+
+@keyframes authProgress {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(340%); }
+}
+
+.auth-stage-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.auth-stage {
+  position: relative;
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  min-height: 54px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-input);
+  color: var(--text-secondary);
+  font-size: 0.76rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.auth-stage svg {
+  color: var(--text-muted);
+}
+
+.auth-stage--active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--text-primary);
+}
+
+.auth-stage--active svg {
+  color: var(--accent);
+}
+
+.auth-stage-dot {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  opacity: 0.45;
+}
+
+.auth-stage--active .auth-stage-dot {
+  background: var(--accent);
+  box-shadow: 0 0 7px var(--accent-glow);
+  opacity: 1;
+  animation: authStagePulse 1.8s ease-in-out infinite;
+}
+
+@keyframes authStagePulse {
+  0%, 100% { transform: scale(0.85); opacity: 0.55; }
+  50% { transform: scale(1.25); opacity: 1; }
+}
+
+.loading-telemetry-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.loading-telemetry-tile {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  align-items: center;
+  gap: 3px 6px;
+  min-width: 0;
+  padding: 11px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-input);
+}
+
+.loading-telemetry-tile svg {
+  color: var(--accent);
+}
+
+.loading-telemetry-tile span {
+  min-width: 0;
+  color: var(--text-secondary);
+  font-size: 0.68rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.loading-telemetry-tile strong {
+  grid-column: 1 / -1;
+  color: var(--text-primary);
+  font-size: 0.88rem;
+  font-weight: 800;
 }
 
 /* Skeleton Loading Elements */
@@ -1617,6 +1929,51 @@ html[data-theme="dark"] .comfort-bar-track {
   background: var(--surface-soft);
   border: 1px solid var(--border);
   border-radius: 16px;
+}
+
+.weather-loading-card {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  align-items: center;
+  gap: 5px 7px;
+  min-width: 0;
+  text-align: left;
+}
+
+.weather-loading-card > svg {
+  color: var(--accent);
+}
+
+.weather-loading-card > strong {
+  color: var(--text-primary);
+  font-size: 0.84rem;
+}
+
+.weather-loading-card > span {
+  grid-column: 1 / -1;
+  color: var(--text-secondary);
+  font-size: 0.74rem;
+  line-height: 1.4;
+}
+
+.weather-loading-tags {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+  margin-top: 7px;
+}
+
+.weather-loading-tags span {
+  min-width: 0;
+  padding: 7px 4px;
+  border-radius: 8px;
+  background: var(--accent-soft);
+  color: var(--text-secondary);
+  font-size: 0.64rem;
+  font-weight: 600;
+  text-align: center;
+  overflow-wrap: anywhere;
 }
 
 .skeleton-line {
@@ -1793,6 +2150,42 @@ html[data-theme="dark"] .comfort-bar-track {
 }
 
 @media (max-width: 600px) {
+  .status-page {
+    align-items: flex-start;
+    padding: 12px;
+  }
+
+  .loading-weather-card {
+    width: 100%;
+    padding: 28px 16px 22px;
+    border-radius: 20px;
+  }
+
+  .radar-pulse-container {
+    width: 88px;
+    height: 88px;
+    margin-bottom: 16px;
+  }
+
+  .loading-brand-icon {
+    width: 52px;
+    height: 52px;
+  }
+
+  .auth-stage-list {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .auth-stage {
+    min-height: 46px;
+  }
+
+  .loading-telemetry-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
   .app {
     width: min(100% - 20px, 1200px);
     padding: 20px 0 40px;
@@ -1812,7 +2205,9 @@ html[data-theme="dark"] .comfort-bar-track {
   }
 
   .input-icon-wrapper input,
-  .input-icon-wrapper select {
+  .input-icon-wrapper select,
+  .responsive-select-trigger,
+  .responsive-select-option {
     font-size: 1rem;
   }
 
