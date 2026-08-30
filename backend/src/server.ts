@@ -159,7 +159,14 @@ async function getWeatherByCityId(
   return response.data;
 }
 
-app.use(cors());
+const FRONTEND_URL =
+  process.env.FRONTEND_URL || "http://localhost:5173";
+
+app.use(
+  cors({
+    origin: FRONTEND_URL,
+  })
+);
 app.use(express.json());
 
 app.get("/api/health", (req, res) => {
@@ -272,12 +279,18 @@ app.get("/api/forecast/:cityId", checkJwt, async (req, res) => {
       });
     }
 
+    const apiKey = process.env.OPENWEATHER_API_KEY;
+
+    if (!apiKey) {
+      throw new Error("OpenWeather API key is missing");
+    }
+
     const response = await axios.get<OpenWeatherForecastResponse>(
       "https://api.openweathermap.org/data/2.5/forecast",
       {
         params: {
           id: cityId,
-          appid: process.env.OPENWEATHER_API_KEY,
+          appid: apiKey,
           units: "metric",
         },
       }
