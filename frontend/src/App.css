@@ -43,13 +43,13 @@
 }
 
 html[data-theme="dark"] {
-  --bg: #050d1b;
-  --bg-gradient: radial-gradient(circle at 50% 0%, #0c1e38 0%, #050d1b 75%);
-  --surface: rgba(14, 27, 46, 0.85);
-  --surface-card: rgba(12, 24, 42, 0.75);
-  --surface-soft: rgba(19, 36, 62, 0.8);
-  --surface-input: rgba(10, 20, 35, 0.9);
-  --surface-glass: rgba(15, 30, 52, 0.65);
+  --bg: #010204;
+  --bg-gradient: radial-gradient(circle at 50% -10%, #08162a 0%, #02050a 42%, #000000 100%);
+  --surface: rgba(7, 13, 23, 0.9);
+  --surface-card: rgba(6, 12, 21, 0.82);
+  --surface-soft: rgba(12, 23, 39, 0.88);
+  --surface-input: rgba(4, 10, 18, 0.94);
+  --surface-glass: rgba(6, 15, 27, 0.72);
 
   --text-primary: #f6faff;
   --text-secondary: #9fb2c9;
@@ -288,6 +288,53 @@ html[data-theme="dark"] .atmospheric-grid {
   opacity: 0.7;
 }
 
+/* Enhanced atmospheric depth */
+.atmospheric-bg--light .sun-glow-container {
+  top: -150px;
+  right: -100px;
+  width: 700px;
+  height: 700px;
+}
+
+.atmospheric-bg--light .sun-aura-1 {
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.44) 0%, rgba(56, 189, 248, 0.3) 52%, transparent 76%);
+}
+
+.atmospheric-bg--light .sun-aura-2 {
+  background: radial-gradient(circle, rgba(36, 107, 253, 0.2) 0%, rgba(14, 165, 233, 0.18) 45%, transparent 72%);
+}
+
+.sun-ray-haze {
+  position: absolute;
+  inset: -180px;
+  border-radius: 50%;
+  background: repeating-radial-gradient(circle, transparent 0 78px, rgba(56, 189, 248, 0.1) 82px 86px, transparent 92px 132px, rgba(251, 191, 36, 0.12) 136px 140px, transparent 146px 190px);
+  filter: blur(3px);
+  animation: sunWaves 9s ease-in-out infinite alternate;
+}
+
+.atmospheric-bg--dark .dark-atmosphere {
+  background: linear-gradient(145deg, #000000 0%, #020611 52%, #000000 100%);
+}
+
+.atmospheric-bg--dark .aurora-glow-1 {
+  background: radial-gradient(ellipse, rgba(28, 91, 190, 0.16) 0%, rgba(20, 135, 180, 0.08) 45%, transparent 72%);
+}
+
+.atmospheric-bg--dark .aurora-glow-2 {
+  background: radial-gradient(ellipse, rgba(24, 189, 242, 0.09) 0%, rgba(57, 65, 180, 0.07) 50%, transparent 72%);
+}
+
+.atmospheric-bg--dark .star {
+  background: #ffffff;
+  box-shadow: 0 0 5px rgba(255, 255, 255, 1), 0 0 12px rgba(91, 211, 255, 0.95), 0 0 22px rgba(46, 123, 255, 0.55);
+}
+
+html[data-theme="dark"] .atmospheric-grid {
+  background-image: radial-gradient(rgba(41, 198, 246, 0.09) 1px, transparent 1px);
+  opacity: 0.45;
+}
+
 /* Background Keyframes */
 @keyframes sunPulse {
   0% { transform: translate(-50%, -50%) scale(0.95); opacity: 0.85; }
@@ -297,6 +344,11 @@ html[data-theme="dark"] .atmospheric-grid {
 @keyframes sunRotate {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+@keyframes sunWaves {
+  0% { transform: scale(0.88); opacity: 0.55; }
+  100% { transform: scale(1.08); opacity: 1; }
 }
 
 @keyframes cloudDrift1 {
@@ -422,18 +474,20 @@ html[data-theme="dark"] .atmospheric-grid {
   border-radius: 36px;
   background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
   filter: blur(28px);
-  opacity: 0.75;
+  opacity: 0.9;
   pointer-events: none;
 }
 
 .login-card {
   position: relative;
+  isolation: isolate;
+  overflow: hidden;
   padding: 48px 40px;
   text-align: center;
-  background: var(--surface);
+  background: radial-gradient(circle at 50% 0%, rgba(36, 107, 253, 0.1), transparent 38%), linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(244, 249, 255, 0.88));
   backdrop-filter: var(--glass-backdrop);
   -webkit-backdrop-filter: var(--glass-backdrop);
-  border: 1px solid var(--border-card);
+  border: 1px solid rgba(255, 255, 255, 0.92);
   border-radius: 28px;
   box-shadow: var(--card-shadow);
   transition: all 0.3s ease;
@@ -454,9 +508,9 @@ html[data-theme="dark"] .atmospheric-grid {
   width: 96px;
   height: 96px;
   border-radius: 26px;
-  background: var(--surface-soft);
-  border: 1px solid var(--border);
-  box-shadow: 0 12px 24px -6px var(--accent-soft);
+  background: radial-gradient(circle at 35% 25%, var(--surface), var(--surface-soft));
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border));
+  box-shadow: 0 16px 34px -12px var(--accent-glow), inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
 .login-logo {
@@ -472,6 +526,7 @@ html[data-theme="dark"] .atmospheric-grid {
   padding: 5px 12px;
   border-radius: 20px;
   background: var(--accent-soft);
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
   color: var(--accent);
   font-size: 0.72rem;
   font-weight: 800;
@@ -516,13 +571,14 @@ html[data-theme="dark"] .atmospheric-grid {
   font-weight: 700;
   letter-spacing: -0.01em;
   cursor: pointer;
-  box-shadow: 0 8px 24px -4px var(--accent-glow);
+  box-shadow: 0 12px 28px -8px var(--accent-glow), inset 0 1px 0 rgba(255, 255, 255, 0.28);
   transition: all 0.25s ease;
 }
 
 .login-button:hover {
   background: linear-gradient(135deg, var(--accent-hover) 0%, #1245b8 100%);
-  box-shadow: 0 12px 28px -2px var(--accent-glow);
+  box-shadow: 0 18px 36px -8px var(--accent-glow), inset 0 1px 0 rgba(255, 255, 255, 0.34);
+  transform: translateY(-2px);
 }
 
 .login-card-footer {
@@ -1460,9 +1516,37 @@ html[data-theme="dark"] .comfort-bar-track {
   -webkit-backdrop-filter: var(--glass-backdrop);
   border: 1px solid var(--border-card);
   border-radius: 24px;
-  box-shadow: var(--card-shadow);
+  box-shadow: 0 28px 70px -24px rgba(24, 73, 150, 0.3), 0 12px 28px -16px rgba(36, 107, 253, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.95);
   min-width: 0;
   overflow: visible;
+}
+
+.login-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(115deg, rgba(255, 255, 255, 0.5), transparent 32%, transparent 68%, rgba(36, 107, 253, 0.06));
+  pointer-events: none;
+}
+
+.login-card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 14%;
+  right: 14%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(36, 107, 253, 0.7), transparent);
+  box-shadow: 0 0 18px var(--accent-glow);
+  pointer-events: none;
+}
+
+html[data-theme="dark"] .login-card {
+  background: radial-gradient(circle at 50% 0%, rgba(46, 123, 255, 0.16), transparent 40%), linear-gradient(145deg, rgba(8, 16, 29, 0.96), rgba(2, 6, 12, 0.94));
+  border-color: rgba(75, 130, 195, 0.42);
+  box-shadow: 0 32px 90px -28px rgba(0, 0, 0, 0.95), 0 0 42px rgba(46, 123, 255, 0.12), inset 0 1px 0 rgba(120, 190, 255, 0.12);
 }
 
 .forecast-title-group {

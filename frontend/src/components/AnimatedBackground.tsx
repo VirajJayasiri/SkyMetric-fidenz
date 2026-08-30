@@ -6,13 +6,13 @@ interface AnimatedBackgroundProps {
 }
 
 // Generate deterministic stars for dark mode
-const STARS = Array.from({ length: 36 }, (_, i) => {
+const STARS = Array.from({ length: 64 }, (_, i) => {
   const top = ((i * 37 + 13) % 94) + 3;
   const left = ((i * 61 + 23) % 94) + 3;
-  const size = (i % 3 === 0 ? 3 : i % 2 === 0 ? 2 : 1.5);
+  const size = i % 11 === 0 ? 4 : i % 3 === 0 ? 3 : i % 2 === 0 ? 2 : 1.5;
   const duration = 2.5 + (i % 5) * 0.8;
   const delay = (i % 7) * 0.4;
-  const opacity = 0.35 + (i % 4) * 0.2;
+  const opacity = 0.5 + (i % 4) * 0.15;
   return { id: i, top, left, size, duration, delay, opacity };
 });
 
