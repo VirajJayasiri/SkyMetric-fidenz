@@ -1,30 +1,63 @@
 import NodeCache from "node-cache";
 
+const CACHE_TTL_SECONDS = 300;
+
+// Raw OpenWeatherMap responses
 export const weatherCache = new NodeCache({
-  stdTTL: 300,
+  stdTTL: CACHE_TTL_SECONDS,
   checkperiod: 60,
 });
 
-let cacheHits = 0;
-let cacheMisses = 0;
-let lastCacheStatus: "HIT" | "MISS" | "EMPTY" = "EMPTY";
+// Final calculated + sorted + ranked response
+export const processedWeatherCache = new NodeCache({
+  stdTTL: CACHE_TTL_SECONDS,
+  checkperiod: 60,
+});
+
+let rawCacheHits = 0;
+let rawCacheMisses = 0;
+let rawLastStatus: "HIT" | "MISS" | "EMPTY" = "EMPTY";
+
+let processedCacheHits = 0;
+let processedCacheMisses = 0;
+let processedLastStatus: "HIT" | "MISS" | "EMPTY" = "EMPTY";
 
 export function recordCacheHit() {
-  cacheHits++;
-  lastCacheStatus = "HIT";
+  rawCacheHits++;
+  rawLastStatus = "HIT";
 }
 
 export function recordCacheMiss() {
-  cacheMisses++;
-  lastCacheStatus = "MISS";
+  rawCacheMisses++;
+  rawLastStatus = "MISS";
+}
+
+export function recordProcessedCacheHit() {
+  processedCacheHits++;
+  processedLastStatus = "HIT";
+}
+
+export function recordProcessedCacheMiss() {
+  processedCacheMisses++;
+  processedLastStatus = "MISS";
 }
 
 export function getCacheStats() {
   return {
-    status: lastCacheStatus,
-    hits: cacheHits,
-    misses: cacheMisses,
-    keys: weatherCache.keys().length,
-    ttlSeconds: 300,
+    rawWeather: {
+      status: rawLastStatus,
+      hits: rawCacheHits,
+      misses: rawCacheMisses,
+      keys: weatherCache.keys().length,
+      ttlSeconds: CACHE_TTL_SECONDS,
+    },
+
+    processedOutput: {
+      status: processedLastStatus,
+      hits: processedCacheHits,
+      misses: processedCacheMisses,
+      keys: processedWeatherCache.keys().length,
+      ttlSeconds: CACHE_TTL_SECONDS,
+    },
   };
 }

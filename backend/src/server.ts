@@ -8,8 +8,11 @@ import { calculateComfortIndex } from "./utils/comfortIndex";
 import { checkJwt } from "./middleware/auth";
 import {
   weatherCache,
+  processedWeatherCache,
   recordCacheHit,
   recordCacheMiss,
+  recordProcessedCacheHit,
+  recordProcessedCacheMiss,
   getCacheStats,
 } from "./services/cacheService";
 
@@ -52,6 +55,25 @@ interface OpenWeatherResponse {
   };
 
   visibility: number;
+}
+
+interface ProcessedWeatherCity {
+  cityId: number;
+  cityName: string;
+  description: string;
+  temperature: number;
+  humidity: number;
+  windSpeed: number;
+  pressure: number;
+  visibility: number;
+  cloudiness: number;
+  comfortScore: number;
+  rank: number;
+}
+
+interface ProcessedWeatherResponse {
+  count: number;
+  data: ProcessedWeatherCity[];
 }
 
 const citiesFilePath = path.join(
@@ -128,6 +150,21 @@ app.get("/api/cities/codes", (req, res) => {
 
 app.get("/api/weather", checkJwt, async (req, res) => {
   try {
+    const processedCacheKey = "ranked-weather";
+
+    const cachedProcessedData =
+      processedWeatherCache.get<ProcessedWeatherResponse>(
+        processedCacheKey
+      );
+
+    if (cachedProcessedData) {
+      recordProcessedCacheHit();
+
+      return res.json(cachedProcessedData);
+    }
+
+    recordProcessedCacheMiss();
+
     const weatherResponses = await Promise.all(
       cityCodes.map((cityCode) =>
         getWeatherByCityId(cityCode)
@@ -169,14 +206,21 @@ app.get("/api/weather", checkJwt, async (req, res) => {
       })
     );
 
-    res.json({
+    const processedResponse: ProcessedWeatherResponse = {
       count: rankedWeatherData.length,
       data: rankedWeatherData,
-    });
+    };
+
+    processedWeatherCache.set(
+      processedCacheKey,
+      processedResponse
+    );
+
+    return res.json(processedResponse);
   } catch (error) {
     console.error(error);
 
-    res.status(500).json({
+    return res.status(500).json({
       message: "Failed to fetch weather data",
     });
   }
