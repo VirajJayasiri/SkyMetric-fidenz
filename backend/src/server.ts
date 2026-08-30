@@ -57,6 +57,34 @@ interface OpenWeatherResponse {
   visibility: number;
 }
 
+interface OpenWeatherForecastResponse {
+  list: {
+    dt: number;
+    main: {
+      temp: number;
+    };
+    weather: {
+      description: string;
+    }[];
+  }[];
+  city: {
+    id: number;
+    name: string;
+  };
+}
+
+interface ForecastPoint {
+  timestamp: number;
+  temperature: number;
+  description: string;
+}
+
+interface ForecastResponse {
+  cityId: number;
+  cityName: string;
+  data: ForecastPoint[];
+}
+
 interface ProcessedWeatherCity {
   cityId: number;
   cityName: string;
@@ -228,6 +256,56 @@ app.get("/api/weather", checkJwt, async (req, res) => {
 
 app.get("/api/cache/status", checkJwt, (req, res) => {
   res.json(getCacheStats());
+});
+
+app.get("/api/forecast/:cityId", checkJwt, async (req, res) => {
+  try {
+    const cityIdParam = req.params.cityId;
+
+    const cityId = Array.isArray(cityIdParam)
+      ? cityIdParam[0]
+      : cityIdParam;
+
+    if (!cityId || !cityCodes.includes(cityId)) {
+      return res.status(400).json({
+        message: "Invalid city ID",
+      });
+    }
+
+    const response = await axios.get<OpenWeatherForecastResponse>(
+      "https://api.openweathermap.org/data/2.5/forecast",
+      {
+        params: {
+          id: cityId,
+          appid: process.env.OPENWEATHER_API_KEY,
+          units: "metric",
+        },
+      }
+    );
+
+    const forecastData = response.data.list
+      .slice(0, 8)
+      .map((item) => ({
+        timestamp: item.dt,
+        temperature: item.main.temp,
+        description:
+          item.weather[0]?.description ?? "Unknown",
+      }));
+
+    const result: ForecastResponse = {
+      cityId: response.data.city.id,
+      cityName: response.data.city.name,
+      data: forecastData,
+    };
+
+    return res.json(result);
+  } catch (error) {
+    console.error("Failed to fetch forecast:", error);
+
+    return res.status(500).json({
+      message: "Failed to fetch forecast data",
+    });
+  }
 });
 
 app.listen(PORT, () => {

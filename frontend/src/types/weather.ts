@@ -16,3 +16,15 @@ export interface WeatherApiResponse {
   count: number;
   data: WeatherCity[];
 }
+
+export interface ForecastPoint {
+  timestamp: number;
+  temperature: number;
+  description: string;
+}
+
+export interface ForecastResponse {
+  cityId: number;
+  cityName: string;
+  data: ForecastPoint[];
+}
