@@ -1,12 +1,12 @@
 # SkyMetric
 
-SkyMetric is a full-stack weather analytics application that compares weather conditions across different cities and ranks them using a custom **Comfort Index Score**.
+SkyMetric is a full-stack weather analytics application that compares live weather conditions across different cities and ranks them using a custom **Comfort Index Score**.
 
-I developed this project as part of the Fidenz Trainee Software Engineer Full Stack assignment.
+I developed this project as part of the **Fidenz Trainee Software Engineer - Full Stack Assignment**.
 
-The application gets live weather data from OpenWeatherMap, calculates a Comfort Index on the backend, ranks cities from the most comfortable to the least comfortable, and displays the results through a responsive dashboard.
+The application gets current weather data from OpenWeatherMap, calculates the Comfort Index on the backend, ranks cities from the most comfortable to the least comfortable, and displays the results through a responsive dashboard.
 
-The application also includes Auth0 authentication, MFA, server-side caching, dark/light themes, sorting and filtering, unit tests, and a 24-hour temperature forecast graph.
+I also implemented authentication with Auth0, Multi-Factor Authentication (MFA), server-side caching, dark/light themes, searching, filtering, sorting, unit tests, weather insights, and a 24-hour temperature forecast graph.
 
 ---
 
@@ -15,7 +15,8 @@ The application also includes Auth0 authentication, MFA, server-side caching, da
 ### Main Features
 
 - Live weather data from OpenWeatherMap
-- Processes 10 cities from `cities.json`
+- Reads city codes from `cities.json`
+- Processes 10 cities
 - Custom Comfort Index from 0 to 100
 - Comfort Index calculated on the backend
 - Cities ranked from most comfortable to least comfortable
@@ -27,7 +28,7 @@ The application also includes Auth0 authentication, MFA, server-side caching, da
   - Wind speed
   - Comfort score
   - Rank
-- Responsive desktop and mobile design
+- Responsive desktop, tablet, and mobile design
 
 ### Authentication
 
@@ -36,14 +37,14 @@ The application also includes Auth0 authentication, MFA, server-side caching, da
 - Multi-Factor Authentication (MFA)
 - Email-based MFA support
 - Public signup disabled
-- Only manually created / whitelisted users can access the application
+- Only manually created / whitelisted users can access the dashboard
 
 ### Caching
 
 - Raw OpenWeatherMap responses cached for 5 minutes
 - Processed ranked weather response cached for 5 minutes
 - Cache HIT / MISS tracking
-- Protected cache debug endpoint
+- Protected cache status endpoint
 
 ### Bonus Features
 
@@ -54,9 +55,10 @@ The application also includes Auth0 authentication, MFA, server-side caching, da
 - Multiple sorting options
 - Comfort Index unit tests
 - 24-hour temperature forecast graph
-- Weather summary / insight cards
+- Weather insight cards
 - Animated weather backgrounds
-- Smooth UI transitions and interactions
+- Smooth UI transitions and micro-interactions
+- Responsive custom dropdown controls
 
 ---
 
@@ -125,6 +127,7 @@ SkyMetric-fidenz/
 │   │   ├── components/
 │   │   │   ├── AnimatedBackground.tsx
 │   │   │   ├── LoadingWeather.tsx
+│   │   │   ├── ResponsiveSelect.tsx
 │   │   │   ├── TemperatureTrendChart.tsx
 │   │   │   ├── ThemeToggle.tsx
 │   │   │   ├── WeatherCard.tsx
@@ -152,16 +155,16 @@ SkyMetric-fidenz/
 
 # Comfort Index
 
-The main part of this project is the custom **Comfort Index**.
+The main processing part of SkyMetric is the custom **Comfort Index**.
 
 The Comfort Index is calculated completely on the backend and gives each city a score between:
 
 ```text
-0 - Very uncomfortable
-100 - Very comfortable
+0   = Very uncomfortable
+100 = Very comfortable
 ```
 
-I used three weather parameters:
+The current algorithm uses three weather parameters:
 
 | Parameter | Ideal Value | Weight |
 |---|---:|---:|
@@ -169,20 +172,20 @@ I used three weather parameters:
 | Humidity | 50% | 30% |
 | Wind Speed | 3 m/s | 20% |
 
-Each individual score is limited to a value between `0` and `100`.
+Each individual parameter score is clamped between `0` and `100`.
 
 ---
 
 ## Temperature Score
 
-I considered around **22°C** as a comfortable outdoor temperature.
+I considered approximately **22°C** as a comfortable outdoor temperature.
 
 ```text
 Temperature Score =
 100 - |temperature - 22| × 5
 ```
 
-The score is clamped between:
+The result is clamped between:
 
 ```text
 0 and 100
@@ -207,14 +210,14 @@ Very high or very low humidity decreases the score.
 
 ## Wind Score
 
-I used approximately **3 m/s** as a comfortable light breeze.
+I considered approximately **3 m/s** as a comfortable light breeze.
 
 ```text
 Wind Score =
 100 - |windSpeed - 3| × 10
 ```
 
-Wind speeds that are much lower or higher than this reduce the score.
+Wind speeds that are much lower or higher than the ideal value reduce the score.
 
 ---
 
@@ -245,7 +248,7 @@ Comfort Score: 87.5 / 100
 
 I gave temperature the largest weight because I think it has the biggest effect on outdoor comfort.
 
-For example, even if the humidity and wind are good, extremely hot or cold weather will still feel uncomfortable.
+Even if humidity and wind are good, extremely hot or cold weather can still feel uncomfortable.
 
 ---
 
@@ -253,19 +256,19 @@ For example, even if the humidity and wind are good, extremely hot or cold weath
 
 Humidity has the second-highest weight.
 
-High humidity can make warm weather feel hotter and uncomfortable, while very low humidity can also feel unpleasant.
+High humidity can make warm temperatures feel hotter and less comfortable, while very low humidity can also feel unpleasant.
 
-Therefore, I gave humidity a weight of 30%.
+For this reason, I gave humidity a weight of 30%.
 
 ---
 
 ## Wind Speed - 20%
 
-Wind speed has a smaller weight.
+Wind speed has the smallest weight in the current formula.
 
-A light breeze can improve comfort, but strong winds can reduce comfort.
+A light breeze can improve comfort, but strong wind can make outdoor conditions uncomfortable.
 
-I decided to give wind speed a weight of 20% because it is useful but usually has less effect than temperature and humidity.
+I gave wind speed a weight of 20% because it is important, but usually has less influence than temperature and humidity.
 
 ---
 
@@ -274,18 +277,18 @@ I decided to give wind speed a weight of 20% because it is useful but usually ha
 ```text
 Temperature = 50%
 Humidity    = 30%
-Wind        = 20%
+Wind Speed  = 20%
 
 Total       = 100%
 ```
 
-I kept the formula simple so it is easy to understand, test, explain, and improve later.
+I kept the formula simple so it is easy to understand, test, explain, and extend later.
 
 ---
 
 # City Ranking
 
-After calculating the Comfort Index for all cities, the backend sorts them in descending order.
+After calculating the Comfort Index for all cities, the backend sorts the cities in descending order.
 
 ```text
 Highest Comfort Score
@@ -301,7 +304,7 @@ Rank #10
 Least Comfortable
 ```
 
-The frontend receives the already calculated score and rank from the backend.
+The frontend receives the calculated `comfortScore` and `rank` from the backend.
 
 The frontend does not calculate the Comfort Index.
 
@@ -309,7 +312,7 @@ The frontend does not calculate the Comfort Index.
 
 # Weather Data
 
-The city IDs are stored inside:
+City IDs are stored in:
 
 ```text
 backend/src/data/cities.json
@@ -317,18 +320,16 @@ backend/src/data/cities.json
 
 The application processes 10 cities.
 
-The `CityCode` values are used to request weather data from OpenWeatherMap.
+The `CityCode` values are used to request current weather data from OpenWeatherMap.
 
-Current weather is requested using the OpenWeatherMap current weather API.
-
-Metric units are used:
+The backend requests weather using metric units:
 
 ```text
 Temperature → °C
 Wind Speed  → m/s
 ```
 
-The application receives information such as:
+The application receives weather information including:
 
 - City name
 - Weather description
@@ -351,19 +352,19 @@ Wind Speed
 
 # 24-Hour Temperature Forecast
 
-I also added a bonus temperature trend feature.
+I added a temperature trend graph as a bonus feature.
 
-The backend uses the OpenWeatherMap forecast API to get forecast data for the selected city.
+The backend uses the OpenWeatherMap forecast API to get forecast information for a selected city.
 
-OpenWeatherMap provides forecast values in approximately 3-hour intervals.
+OpenWeatherMap provides forecast data in approximately 3-hour intervals.
 
-The application uses the next 8 forecast points:
+SkyMetric uses the next 8 forecast points:
 
 ```text
-8 × 3 hours = approximately 24 hours
+8 × 3 hours ≈ 24 hours
 ```
 
-The frontend displays the result as a line chart using Recharts.
+The frontend displays the temperatures as a line graph using **Recharts**.
 
 The forecast endpoint is:
 
@@ -377,7 +378,7 @@ This endpoint is protected using Auth0.
 
 # Search, Filtering and Sorting
 
-The dashboard includes frontend controls to make the weather data easier to explore.
+The dashboard contains frontend controls to make the city data easier to explore.
 
 ## City Search
 
@@ -395,7 +396,7 @@ Only matching cities are displayed.
 
 ## Temperature Filters
 
-Available filters are:
+The available temperature filters are:
 
 ```text
 All temperatures
@@ -410,15 +411,15 @@ Warm
 Above 27°C
 ```
 
-These filters only change what is displayed on the frontend.
+Filtering only changes the cities displayed on the frontend.
 
-They do not change the backend Comfort Index or rank.
+It does not change the backend Comfort Index or original rank.
 
 ---
 
 ## Sorting Options
 
-Users can sort the displayed cities by:
+Users can sort displayed cities by:
 
 - Comfort Score
 - Temperature - High to Low
@@ -433,33 +434,35 @@ The original Comfort Index rank still comes from the backend.
 
 SkyMetric supports both light and dark themes.
 
-The selected theme is stored in browser local storage so it remains selected after refreshing the page.
+The selected theme is stored in browser local storage so the preferred theme remains selected after refreshing the application.
 
-### Light Mode
+## Light Mode
 
-The light theme uses a bright weather-inspired design with:
+The light theme uses:
 
-- Sky colors
+- Sky-inspired colors
 - Sun glow effects
-- Soft background elements
+- Soft atmospheric backgrounds
+- Light glass-style panels
 
-### Dark Mode
+## Dark Mode
 
 The dark theme uses:
 
 - Dark navy colors
-- Stars
-- Atmospheric blue effects
+- Star effects
+- Subtle blue atmospheric effects
+- Dark glass-style panels
 
-The theme changes only the interface appearance and does not affect application functionality.
+Changing the theme only affects the interface appearance and does not affect application functionality.
 
 ---
 
 # Caching Design
 
-SkyMetric uses two server-side caches using `node-cache`.
+SkyMetric uses two server-side cache layers with `node-cache`.
 
-Both caches have a TTL of:
+Both caches use the same TTL:
 
 ```text
 300 seconds
@@ -479,45 +482,43 @@ The raw weather cache stores the original OpenWeatherMap response for each city.
 
 Each city ID is used as a separate cache key.
 
-Example flow:
-
 ```text
-Request weather for city
+Request city weather
         ↓
 Check Raw Cache
         ↓
-    Is data cached?
+   Is data cached?
       ↙       ↘
     YES       NO
      ↓         ↓
     HIT       MISS
      ↓         ↓
-Return      Request data
-cached      from OpenWeatherMap
+Return      Request from
+cached      OpenWeatherMap
 data            ↓
-             Save data
-             to cache
+             Store in
+              cache
 ```
 
-This helps reduce unnecessary requests to OpenWeatherMap.
+This reduces unnecessary calls to OpenWeatherMap.
 
 ---
 
 ## 2. Processed Output Cache
 
-I also implemented a second cache for the final processed weather response.
+I also implemented a second cache for the final processed response.
 
-The cache key is:
+The processed cache uses the key:
 
 ```text
 ranked-weather
 ```
 
-This cached response already contains:
+This response already contains:
 
 - Weather data
 - Comfort Scores
-- Sorted cities
+- Sorted city results
 - Rank positions
 
 The request flow is:
@@ -536,26 +537,29 @@ Check Processed Cache
 Return      Check Raw
 cached      Weather Cache
 response        ↓
-            Get weather data
+            Get weather
+               data
                 ↓
-          Calculate Comfort Index
+        Calculate Comfort
+              Index
                 ↓
-             Sort cities
+            Sort cities
                 ↓
             Assign ranks
                 ↓
-       Save processed response
+        Store processed
+             response
                 ↓
              Return
 ```
 
-This avoids repeatedly calculating scores and sorting the same data during the five-minute cache period.
+This avoids repeatedly calculating Comfort Scores, sorting cities, and assigning ranks during the five-minute cache period.
 
 ---
 
 # Cache Debug Endpoint
 
-Cache statistics can be checked through:
+Cache information can be checked using:
 
 ```text
 GET /api/cache/status
@@ -563,7 +567,7 @@ GET /api/cache/status
 
 This endpoint requires authentication.
 
-Example response:
+Example:
 
 ```json
 {
@@ -586,15 +590,15 @@ Example response:
 
 `rawWeather` shows information about cached OpenWeatherMap responses.
 
-`processedOutput` shows information about the final calculated and ranked response.
+`processedOutput` shows information about the final calculated, sorted, and ranked response.
 
-Because I use an in-memory cache, all cached data is cleared when the backend restarts.
+Because this project uses an in-memory cache, all cached data is cleared when the backend restarts.
 
 ---
 
 # Authentication and Authorization
 
-SkyMetric uses Auth0 for authentication.
+SkyMetric uses **Auth0** for authentication and authorization.
 
 The frontend uses:
 
@@ -604,25 +608,25 @@ The frontend uses:
 
 After login, Auth0 provides an access token.
 
-The frontend sends this token to protected backend endpoints using:
+The frontend sends this access token to protected backend endpoints:
 
 ```text
 Authorization: Bearer <access_token>
 ```
 
-The Express backend verifies the token using:
+The Express backend validates the JWT using:
 
 ```text
 express-oauth2-jwt-bearer
 ```
 
-The backend checks:
+The backend validates:
 
 - JWT signature
 - Auth0 issuer
 - API audience
 
-The Auth0 API audience is:
+The API audience used by SkyMetric is:
 
 ```text
 https://api.skymetric
@@ -632,16 +636,16 @@ https://api.skymetric
 
 # Multi-Factor Authentication
 
-MFA is enabled using Auth0.
+MFA is configured through Auth0.
 
-The configured authentication flow supports verification using:
+The authentication flow supports:
 
 - Authenticator OTP
 - Email MFA for verified users
 
 Public signup is disabled.
 
-Users need to be manually created or whitelisted before they can access the dashboard.
+Users need to be manually created / whitelisted before they can access the dashboard.
 
 ---
 
@@ -651,8 +655,8 @@ Users need to be manually created or whitelisted before they can access the dash
 |---|---|---|---|
 | GET | `/api/health` | Public | Checks whether the backend is running |
 | GET | `/api/cities/codes` | Public | Returns configured city codes |
-| GET | `/api/weather` | Protected | Returns current weather, Comfort Scores and rankings |
-| GET | `/api/cache/status` | Protected | Returns raw and processed cache statistics |
+| GET | `/api/weather` | Protected | Returns current weather, Comfort Scores, and rankings |
+| GET | `/api/cache/status` | Protected | Returns raw and processed cache information |
 | GET | `/api/forecast/:cityId` | Protected | Returns approximately 24 hours of forecast data |
 
 ---
@@ -661,7 +665,7 @@ Users need to be manually created or whitelisted before they can access the dash
 
 Real `.env` files are not committed to Git.
 
-Example environment files are included in the project.
+The repository includes `.env.example` files to show the required variables.
 
 ---
 
@@ -673,7 +677,7 @@ Create:
 backend/.env
 ```
 
-based on:
+using:
 
 ```text
 backend/.env.example
@@ -701,7 +705,7 @@ Create:
 frontend/.env
 ```
 
-based on:
+using:
 
 ```text
 frontend/.env.example
@@ -717,13 +721,15 @@ VITE_AUTH0_CLIENT_ID=your_auth0_client_id_here
 VITE_AUTH0_AUDIENCE=https://api.skymetric
 ```
 
-Do not commit real API keys or sensitive environment values.
+Do not commit real API keys, access tokens, or sensitive environment values.
 
 ---
 
 # Auth0 Local Configuration
 
-For the frontend Auth0 Single Page Application:
+Create an Auth0 **Single Page Application** for the frontend.
+
+Use the following local development URLs:
 
 ```text
 Allowed Callback URLs:
@@ -748,6 +754,8 @@ RS256
 
 Public signup should be disabled on the database connection.
 
+Users who need access should be manually created.
+
 ---
 
 # Installation and Setup
@@ -762,8 +770,8 @@ Before running the application, install:
 
 You also need:
 
-- An OpenWeatherMap API key
-- An Auth0 account
+- OpenWeatherMap account and API key
+- Auth0 account
 
 ---
 
@@ -785,9 +793,9 @@ cd backend
 npm install
 ```
 
-Create a `.env` file using `.env.example`.
+Create a `.env` file based on `.env.example` and add your OpenWeatherMap and Auth0 configuration.
 
-Then start the backend:
+Start the backend:
 
 ```bash
 npm run dev
@@ -799,7 +807,7 @@ The backend runs at:
 http://localhost:5000
 ```
 
-You can test it using:
+The health endpoint can be checked at:
 
 ```text
 http://localhost:5000/api/health
@@ -816,9 +824,9 @@ cd frontend
 npm install
 ```
 
-Create a `.env` file using `.env.example`.
+Create a `.env` file based on `.env.example` and add your Auth0 configuration.
 
-Then start the frontend:
+Start the frontend:
 
 ```bash
 npm run dev
@@ -834,7 +842,7 @@ http://localhost:5173
 
 # Testing
 
-I used Vitest to test the Comfort Index function.
+I used **Vitest** to test the Comfort Index function.
 
 Run the tests using:
 
@@ -845,12 +853,12 @@ npm test
 
 The current tests check:
 
-- Ideal conditions return 100
-- High temperature reduces the score
+- Ideal conditions return a score of 100
+- Uncomfortable temperature reduces the score
 - Uncomfortable humidity reduces the score
-- Strong wind reduces the score
-- Extreme values remain inside the 0–100 range
-- Same input produces the same result
+- Uncomfortable wind speed reduces the score
+- Extreme values remain within the 0–100 range
+- The same inputs produce the same result
 
 Current test suite:
 
@@ -866,7 +874,7 @@ Current test suite:
 
 ## Backend
 
-Run tests:
+Run the tests:
 
 ```bash
 cd backend
@@ -890,7 +898,7 @@ cd frontend
 npm run lint
 ```
 
-Create the production build:
+Build the frontend:
 
 ```bash
 npm run build
@@ -902,7 +910,7 @@ npm run build
 
 ## 1. Simple Comfort Formula vs Complex Meteorological Formula
 
-I chose a simple weighted heuristic instead of using a complex official comfort model.
+I chose a simple weighted heuristic instead of using a complex official meteorological comfort model.
 
 ### Advantages
 
@@ -910,11 +918,11 @@ I chose a simple weighted heuristic instead of using a complex official comfort 
 - Easy to explain
 - Easy to test
 - Easy to modify
-- Predictable results
+- Predictable output
 
 ### Trade-off
 
-The Comfort Index is my own approximation and does not include every factor that affects human comfort.
+The Comfort Index is my own approximation and does not include every possible factor that affects human comfort.
 
 ---
 
@@ -927,13 +935,13 @@ I used `node-cache` because this is a small take-home project and does not need 
 - Simple setup
 - Fast
 - No external cache server
-- Easy to demonstrate
+- Easy to test and demonstrate
 
 ### Trade-off
 
 The cache is lost when the backend restarts.
 
-It also cannot automatically share data between multiple backend instances.
+It also cannot automatically share cached data between multiple backend instances.
 
 For a larger production system, I would consider using Redis.
 
@@ -953,45 +961,45 @@ The processed cache avoids repeating:
 
 ### Trade-off
 
-Both cache layers need to use a consistent TTL so the final output does not become too old compared with the raw data.
+Both caches need to use a consistent TTL so processed data does not become older than the raw weather data.
 
 ---
 
 ## 4. Parallel API Requests
 
-Weather data for the cities is loaded using `Promise.all()`.
+Weather data for all cities is loaded using `Promise.all()`.
 
-This allows requests to run at the same time instead of waiting for each city one by one.
+This allows requests to happen at the same time instead of waiting for every city one by one.
 
 ### Advantage
 
-The total response time is faster.
+The overall response time is faster.
 
 ### Trade-off
 
 If one OpenWeatherMap request fails, the complete batch can currently fail.
 
-A future improvement could use:
+A possible future improvement would be:
 
 ```text
 Promise.allSettled()
 ```
 
-to handle partial failures.
+to support partial failures.
 
 ---
 
 # Known Limitations
 
-- The Comfort Index is a custom heuristic and not an official meteorological comfort standard.
-- The current Comfort Index uses only temperature, humidity, and wind speed.
-- The cache is stored in backend memory.
+- The Comfort Index is a custom heuristic and is not an official meteorological comfort standard.
+- The current Comfort Index uses temperature, humidity, and wind speed only.
+- Both cache layers are stored in backend memory.
 - Cached data is cleared when the backend restarts.
-- The cache is not shared between multiple backend instances.
+- Cached data is not shared between multiple backend instances.
 - The application depends on OpenWeatherMap API availability and rate limits.
 - Historical weather data is not stored in a database.
 - The forecast graph shows short-term forecast data but does not store historical trends.
-- If one current-weather request fails inside `Promise.all()`, the entire weather request can fail.
+- If one current-weather request fails inside `Promise.all()`, the complete weather request can fail.
 
 ---
 
@@ -999,18 +1007,18 @@ to handle partial failures.
 
 Some improvements I would consider in the future are:
 
-- Add more weather parameters to the Comfort Index
-- Redis-based distributed caching
+- Add additional weather parameters to the Comfort Index
+- Use Redis for distributed caching
 - Store historical weather data
-- Longer-term weather trend graphs
-- Better partial API failure handling
-- More automated frontend and API tests
-- Production deployment configuration
+- Add longer-term weather trend graphs
+- Improve partial API failure handling
+- Add more frontend and API automated tests
+- Add production deployment configuration
 
 ---
 
 # Summary
 
-SkyMetric combines weather data, backend processing, caching, authentication, responsive design, and data visualization in one full-stack application.
+SkyMetric combines live weather data, backend processing, caching, authentication, responsive UI design, and data visualization in one full-stack application.
 
-The main goal was to keep the solution understandable and structured while also adding some useful bonus features such as dark mode, sorting/filtering, unit tests, and the temperature trend graph.
+My main goal was to keep the solution understandable and well structured while also implementing useful bonus features such as dark mode, sorting and filtering, unit tests, responsive custom controls, and the temperature trend graph.
